@@ -1,0 +1,4 @@
+**/node_modules
+pics/assets/*
+!pics/assets/noimage.png
+elastic/data/*

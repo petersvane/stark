@@ -1,0 +1,47 @@
+version: '3'
+services:
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.5.1
+    volumes:
+      - /home/peter/repos/stark/elastic/data:/usr/share/elasticsearch/data
+    networks:
+      - starknet
+  kibana:
+    image: docker.elastic.co/kibana/kibana:6.5.1
+    volumes:
+      - /home/peter/repos/stark/kibana/config:/usr/share/kibana/config
+    networks:
+      - starknet
+  pics:
+    image: node:10.13.0-alpine
+    working_dir: /work
+    command: ['npm', 'start']
+    volumes:
+      - /home/peter/repos/stark/pics:/work
+    networks:
+      - starknet
+  rproxy:
+    image: nginx:latest
+    working_dir: /work
+    depends_on:
+      - kibana
+      - pics
+    volumes:
+      - /home/peter/repos/stark/rproxy/config/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /home/peter/repos/stark/rproxy/logs:/logs
+    networks:
+      - starknet
+    ports:
+      - '80:80'
+  index:
+    image: node:10.13.0-alpine
+    working_dir: /work
+    depends_on:
+      - elastic
+    command: ['npm', 'start']
+    volumes:
+      - /home/peter/repos/stark/index:/work
+    networks:
+      - starknet
+networks:
+  starknet:
